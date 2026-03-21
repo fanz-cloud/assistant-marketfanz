@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>chatbotAI FanzMarket- Premium Support</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        /* Dasar & Layout */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Poppins', sans-serif; background: #0a0a0c; color: white; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
+        
+       /* Update bagian .chat-container lu jadi begini */
+.chat-container { 
+    width: 100%; 
+    max-width: 450px; 
+    height: 100vh; 
+    background: #16161a; 
+    display: flex; 
+    flex-direction: column; 
+    position: relative;
+    /* Tambahan di bawah ini wajib ada */
+    background-size: cover; 
+    background-position: center; 
+    transition: background 0.5s ease; 
+}
+
+        /* Status Bar ala HP */
+        .status-bar { padding: 8px 20px; display: flex; justify-content: space-between; font-size: 11px; color: #666; background: #0a0a0c; z-index: 10; font-weight: 600; }
+
+              .header { padding: 15px 20px; border-bottom: 1px solid #2a2a2e; display: flex; align-items: center; gap: 15px; background: rgba(22, 22, 26, 0.9); backdrop-filter: blur(10px); z-index: 10; }
+        .back-btn { color: white; text-decoration: none; font-size: 24px; transition: 0.3s; }
+        .bot-info h3 { font-size: 16px; margin: 0; }
+        .bot-info span { font-size: 10px; color: #00d2ff; display: flex; align-items: center; gap: 4px; font-weight: 600; }
+        .dot { width: 7px; height: 7px; background: #00d2ff; border-radius: 50%; display: inline-block; animation: blink 1.2s infinite; }
+
+        /* CSS MODAL WALLPAPER (INI YANG LU KETINGGALAN TADI) */
+        .modal-wp { display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.9); backdrop-filter: blur(8px); justify-content:center; align-items:center; }
+        .modal-wp-content { background:#1c1c21; padding:25px; border-radius:25px; width:88%; max-width:350px; text-align:center; border: 1px solid #333; animation: zoomIn 0.3s ease; }
+        .wp-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 20px; }
+        .wp-option { width: 100%; height: 80px; border-radius: 12px; cursor: pointer; border: 2px solid #333; background-size: cover; background-position: center; transition: 0.2s; }
+        .wp-option:hover { transform: scale(1.05); border-color: #00d2ff; }
+        
+        /* Area Chatting */
+        #display { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; scroll-behavior: smooth; scrollbar-width: none; }
+        #display::-webkit-scrollbar { display: none; }
+        
+        .bot-msg, .user-msg { padding: 12px 16px; border-radius: 18px; font-size: 13px; max-width: 85%; line-height: 1.5; animation: slideUp 0.3s ease-out forwards; position: relative; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .bot-msg { background: #232329; align-self: flex-start; border-bottom-left-radius: 2px; color: #e0e0e0; border: 1px solid #2a2a2e; }
+        .user-msg { background: #007bff; align-self: flex-end; border-bottom-right-radius: 2px; color: white; font-weight: 400; }
+        .time { font-size: 9px; opacity: 0.6; display: block; margin-top: 6px; text-align: right; }
+
+        /* Komponen Spesial */
+        .pay-card { background: #1f1f23; border: 1px dashed #34343a; padding: 14px; border-radius: 14px; margin-top: 10px; transition: 0.3s; }
+        .pay-card:hover { border-color: #00d2ff; background: #232329; }
+        .copy-btn { background: #00d2ff; color: #000; border: none; padding: 8px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer; margin-top: 10px; width: 100%; transition: 0.2s; }
+        .copy-btn:active { transform: scale(0.96); }
+
+        #typing { font-size: 11px; color: #555; margin: 0 20px 10px; display: none; font-style: italic; font-weight: 500; }
+
+        /* Quick Replies Menu */
+        .quick-replies { display: flex; gap: 10px; overflow-x: auto; padding: 12px 20px; scrollbar-width: none; background: #16161a; }
+        .quick-replies::-webkit-scrollbar { display: none; }
+        .qr-btn { background: #1f1f23; border: 1px solid #333; color: #ccc; padding: 9px 18px; border-radius: 25px; font-size: 11px; white-space: nowrap; cursor: pointer; transition: 0.3s; font-weight: 600; }
+        .qr-btn:hover { background: #007bff; color: white; border-color: #007bff; }
+
+        /* Input Area */
+        .input-box { padding: 15px 20px; display: flex; gap: 12px; background: #16161a; border-top: 1px solid #2a2a2e; }
+        input { flex: 1; background: #232329; border: 1px solid #333; padding: 12px 20px; border-radius: 30px; color: white; outline: none; font-size: 13px; transition: 0.3s; }
+        input:focus { border-color: #00d2ff; background: #2a2a32; }
+        /* Ganti kode #send lama lu dengan ini */
+#send { 
+    background: #00d2ff; /* Warna biru cerah sesuai ikon Telegram */
+    border: none; 
+    width: 48px; 
+    height: 48px; 
+    border-radius: 50%; 
+    color: white; 
+    cursor: pointer; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    box-shadow: 0 4px 12px rgba(0,210,255,0.4); 
+    transition: 0.2s; 
+}
+#send:active { transform: scale(0.9); }
+
+        /* Modal QRIS */
+        #qrisModal { display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.92); backdrop-filter: blur(8px); justify-content:center; align-items:center; }
+        .modal-content { position:relative; width:88%; max-width:330px; background:white; padding:22px; border-radius:28px; text-align:center; animation: zoomIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+        .close-modal { position:absolute; top:-15px; right:-15px; background:#ff4757; color:white; width:38px; height:38px; border-radius:50%; display:flex; justify-content:center; align-items:center; cursor:pointer; font-weight:bold; border: 3px solid white; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+
+        /* Animasi */
+        @keyframes zoomIn { from { transform: scale(0.6); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        @keyframes blink { 50% { opacity: 0.3; } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+    <div class="chat-container">
+        <div class="status-bar">
+            <span id="clock">00:00:00</span>
+        </div>
+
+      <div class="header">
+    <a href="https://fanz-cloud.github.io/Profile-fanzmarket/" class="back-btn">‹</a>
+    <div class="bot-info">
+        <h3>BOT ASSISTANT</h3>
+        <span><div class="dot"></div> Online</span>
+    </div>
+    
+            <div onclick="openWpModal()" style="margin-left: auto; cursor: pointer; background: rgba(255,255,255,0.1); padding: 5px; border-radius: 10px; border: 1px solid #333;">
+                <img src="https://cdn-icons-png.flaticon.com/512/8139/8139311.png" width="25" height="25" style="display: block;">
+            </div>
+        </div>
+
+        <div id="display"></div>
+        <div id="typing">sedang mengetik...</div>
+
+        <div class="quick-replies">
+            <button class="qr-btn" onclick="quickReply('Daftar Harga')">Harga</button>
+            <button class="qr-btn" onclick="quickReply('Pembayaran')">Bayar</button>
+            <button class="qr-btn" onclick="quickReply('Cara Order')">Order</button>
+            <button class="qr-btn" onclick="quickReply('Lama Proses')">Proses</button>
+        </div>
+
+<div class="input-box">
+    <input type="text" id="userInput" placeholder="Tulis sesuatu..." onkeypress="if(event.key === 'Enter') sendMsg()">
+    
+    <button id="send" onclick="sendMsg()">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512" width="22" height="22" fill="#FFFFFF">
+            <path d="M248 8C111 8 0 119 0 256s111 248 248 248 248-111 248-248S385 8 248 8zm121.8 169.9l-40.7 191.8c-3 13.6-11.1 16.9-22.4 10.5l-62.1-45.8-29.9 28.8c-3.3 3.3-6.1 6.1-12.5 6.1l4.4-63.1 114.9-103.8c5-4.4-1.1-6.9-7.7-2.5L171.8 288.5 110.8 269c-13.4-4.2-13.6-13.4 2.8-19.7l238.2-91.8c11-4 20.6 2.6 16.2 20.4z"/>
+        </svg>
+    </button>
+</div>
+
+        <div id="wpModal" class="modal-wp">
+        <div class="modal-wp-content">
+            <h4 style="margin-bottom: 5px; color: white;">Tema Chat</h4>
+            <p style="font-size: 11px; color: #888; margin-bottom: 15px;">Atur nama & background</p>
+              <button onclick="resetNama()" style="width: 100%; padding: 10px; border-radius: 12px; border: 1px solid #444; background: #232329; color: #ff4757; font-size: 11px; font-weight: bold; cursor: pointer; margin-bottom: 15px; transition: 0.3s;">
+            🔄 RESET NAMA PANGGILAN
+        </button>
+        
+            <div class="wp-grid">
+                <div class="wp-option" style="background: #16161a;" onclick="changeBg('default')"></div>
+                
+                <div class="wp-option" style="background-image: url('walpaperlive_2.jpg');" onclick="changeBg('walpaperlive_2.jpg')"></div>
+                
+                <div class="wp-option" style="background-image: url('walpaperlive_3.jpg');" onclick="changeBg('walpaperlive_3.jpg')"></div>
+                
+                <div class="wp-option" style="background-image: url('walpaper_4.jpg');" onclick="changeBg('walpaper_4.jpg')"></div>
+                
+                <div class="wp-option" style="background-image: url('walpaper_5.jpg');" onclick="changeBg('walpaper_5.jpg')"></div>
+            </div>
+            <button onclick="closeWpModal()" style="margin-top: 20px; width: 100%; padding: 12px; border-radius: 15px; border: none; background: #ff4757; color: white; font-weight: bold; cursor: pointer;">Tutup</button>
+        </div>
+    </div>
+    
+    <div id="qrisModal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal()">✕</span>
+            <h4 style="color:#333; margin-bottom:15px; font-size:16px; font-weight:600;">Scan QRIS</h4>
+            <img src="qris.jpg" style="width:100%; border-radius:18px; border: 1px solid #f0f0f0;" alt="QRIS">
+            <p style="color:#888; font-size:11px; margin-top:15px; line-height:1.4;">Mendukung All E-Wallet (DANA, OVO, ShopeePay) &  M-Banking, KIRIM BUKTI TF KE ADMIN</p>
+        </div>
+    </div>
+
+    <script>
+        // --- KONFIGURASI ADMIN ---
+        const NO_WA_ADMIN = "6287795237332"; // Ganti ke nomor WA asli lu
+        let userName = localStorage.getItem("user_fanzz");
+
+        // --- DATABASE RESPON PINTAR ---
+        const botKnowledge = {
+            "halo": ["Halo! Ada yang bisa dibantu kak?", "Halo! Mau top up apa hari ini?", "Siap melayani, silakan tanya-tanya Bosku!"],
+            "legal": ["Pastinya 100% Legal & Aman kak. Kita pakai sistem resmi, dijamin anti-minus🙏🏻"],
+            "admin": ["Admin lagi proses pesanan lain, tapi kalau mau chat WA langsung bisa kok."],
+            "ml": ["Diamond MLBB ready stok, proses kilat! Cek harganya di menu ya."],
+            "ff": ["Diamond Free Fire murah ready stok, proses dalam hitungan menit!"],
+            "error": ["Kalau ada kendala sistem atau salah input, lapor CS via WA ya😊"]
+        };
+
+        // Jam Real-time
+        setInterval(() => {
+            document.getElementById('clock').innerText = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
+        }, 1000);
+
+        // Pesan Sambutan Otomatis
+        window.onload = () => {
+            setTimeout(() => {
+                if (userName) {
+                    botReply(`welcome back to marketfanz user <b>${userName}</b> 😊. Ada yg bisa saya bantu terkait masalah Pembayaran/trx? boleh tanya² yg lain🙏🏻`);
+                } else {
+                    botReply("Selamat datang di MarketFanzz. Boleh tau siapa nama panggilannya biar makin akrab? 😊");
+                }
+            }, 1000);
+        };
+
+        function botReply(html) {
+            const display = document.getElementById('display');
+            let jam = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            display.innerHTML += `<div class="bot-msg">${html}<span class="time">${jam}</span></div>`;
+            display.scrollTop = display.scrollHeight;
+            speak(html.replace(/<[^>]*>?/gm, '')); // Voice mode
+        }
+
+        function handleLogic(msg) {
+            let m = msg.toLowerCase();
+            
+            // Simpan Nama User Baru
+            if(!userName && !m.match(/harga|bayar|proses|order|testi/)) {
+                userName = msg;
+                localStorage.setItem("user_fanzz", userName);
+                botReply(`Salam kenal kak <b>${userName}</b>! Nama lu udah gue kirim ke Database. Ada yang bisa gue bantu?`);
+                return;
+            }
+
+            let nameTag = userName ? ` kak ${userName}` : " Bosku";
+
+            // Fitur Utama
+            if(m.includes("harga")) {
+                botReply(`Daftar harga sudah murah, cek selengkapnya ada di web utama ya${nameTag}!`);
+            } else if(m.includes("bayar") || m.includes("payment")) {
+                botReply(`Selesaikan pembayaran lewat sini${nameTag}:<br>
+                     
+
+                    <div class="pay-card">
+                        <small>DANA</small><br><b>087819661875</b>
+                        <button class="copy-btn" onclick="copyRek('087819661875')">SALIN NOMOR</button>
+                      
+                    <div class="pay-card">
+                        <small>GOPAY</small><br><b>087795237332</b>
+                        <button class="copy-btn" onclick="copyRek('087795237332')">SALIN NOMOR</button>
+                    </div>
+                    
+                    <div class="pay-card" style="border-color: #f7931e;">
+                        <b>🟠 QRIS (ALL PAYMENT)</b><br>
+                        <button onclick="openModal()" style="background:#f7931e; color:black; border:none; padding:9px; border-radius:8px; font-weight:700; font-size:11px; margin-top:10px; cursor:pointer; width:100%;">TAMPILKAN BARCODE</button>
+                    </div>`);
+                    
+            } else if(m.includes("proses")) {
+                botReply(`Proses kita kilat${nameTag}, cuma 1-5 menit kalau sistem lancar! ⚡`);
+            } else if(m.includes("order")) {
+                botReply("Pilih Game -> Masukkan ID -> Pilih Nominal -> Bayar. pending masuk! 🛒");
+            } 
+            // Cek Database Kata Kunci
+            else {
+                let found = false;
+                for (let key in botKnowledge) {
+                    if (m.includes(key)) {
+                        let resList = botKnowledge[key];
+                        botReply(resList[Math.floor(Math.random() * resList.length)]);
+                        found = true; break;
+                    }
+                }
+                
+                // Jika Pertanyaan Gak Terdaftar -> Arahkan ke WA
+                if (!found) {
+                    let waLink = `https://wa.me/${NO_WA_ADMIN}?text=Halo%20Admin,%20saya%20${userName || 'User'},%20mau%20tanya%20soal:%20${encodeURIComponent(msg)}`;
+                    botReply(`Aduh${nameTag}, gue belum paham soal itu. Tanya langsung ke Admin aja<br><br><a href="${waLink}" target="_blank" style="background:#25d366; color:white; padding:10px 16px; border-radius:12px; text-decoration:none; font-weight:700; display:inline-block; font-size:12px; box-shadow: 0 4px 12px rgba(37,211,102,0.3);">💬 TANYA ADMIN (WA)</a>`);
+                }
+            }
+        }
+
+        function sendMsg() {
+            const input = document.getElementById('userInput');
+            const val = input.value.trim();
+            if(!val) return;
+            let jam = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            document.getElementById('display').innerHTML += `<div class="user-msg">${val}<span class="time">${jam}</span></div>`;
+            input.value = "";
+            document.getElementById('display').scrollTop = document.getElementById('display').scrollHeight;
+            document.getElementById('typing').style.display = "block";
+            setTimeout(() => {
+                document.getElementById('typing').style.display = "none";
+                handleLogic(val);
+            }, 1000);
+        }
+
+        function speak(t) {
+            let s = window.speechSynthesis;
+            if(s.speaking) s.cancel();
+            let u = new SpeechSynthesisUtterance(t);
+            u.lang = 'id-ID';
+            u.rate = 1.1;
+            s.speak(u);
+        }
+
+        function quickReply(t) { document.getElementById('userInput').value = t; sendMsg(); }
+        function openModal() { document.getElementById('qrisModal').style.display = "flex"; }
+        function closeModal() { document.getElementById('qrisModal').style.display = "none"; }
+        function copyRek(r) { navigator.clipboard.writeText(r); alert("✅ Berhasil Disalin!"); }
+        window.onclick = (e) => { if(e.target == document.getElementById('qrisModal')) closeModal(); }
+        
+        // --- LOGIC GANTI WALLPAPER ---
+window.addEventListener('DOMContentLoaded', () => {
+    const savedBg = localStorage.getItem('user_bg');
+    if (savedBg) applyBg(savedBg);
+});
+
+function openWpModal() {
+    document.getElementById('wpModal').style.display = 'flex';
+}
+
+function closeWpModal() {
+    document.getElementById('wpModal').style.display = 'none';
+}
+
+function changeBg(url) {
+    localStorage.setItem('user_bg', url);
+    applyBg(url);
+}
+
+function resetNama() {
+    // Munculin konfirmasi biar gak sengaja kehapus
+    if (confirm("Mau ganti nama panggilannya, kak?")) {
+        localStorage.removeItem("user_fanzz"); // Menghapus data nama yang tersimpan
+        alert("Nama berhasil direset! Halaman akan dimuat ulang.");
+        location.reload(); // Refresh halaman supaya bot nanya nama lagi dari awal
+    }
+}
+
+function applyBg(url) {
+    const container = document.querySelector('.chat-container');
+    if (url === 'default') {
+        container.style.backgroundImage = 'none';
+        container.style.backgroundColor = '#16161a';
+    } else {
+        container.style.backgroundImage = `url('${url}')`;
+    }
+}
+</script>
+</body>
+</html>
