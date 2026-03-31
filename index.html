@@ -8,22 +8,43 @@
     <style>
         /* Dasar & Layout */
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Poppins', sans-serif; background: #0a0a0c; color: white; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
-        
-       /* Update bagian .chat-container lu jadi begini */
-.chat-container { 
-    width: 100%; 
-    max-width: 450px; 
-    height: 100vh; 
-    background: #16161a; 
+        body { 
+    font-family: 'Poppins', sans-serif; 
+    background: #0a0a0c; 
+    color: white; 
     display: flex; 
-    flex-direction: column; 
-    position: relative;
-    /* Tambahan di bawah ini wajib ada */
-    background-size: cover; 
-    background-position: center; 
-    transition: background 0.5s ease; 
+    justify-content: center; 
+    align-items: center; 
+    height: 100dvh; /* <--- GANTI vh JADI dvh */
+    margin: 0; /* Tambahin ini biar gak ada sela putih di pinggir */
+    overflow: hidden; 
 }
+        
+          .chat-container { 
+            width: 100%; 
+            max-width: 450px; 
+            height: 100dvh; 
+            background: #16161a; 
+            display: flex; 
+            flex-direction: column; 
+            position: relative;
+            overflow: hidden; /* Penting agar blur tidak bocor */
+            z-index: 1;
+            margin: auto;
+        }
+
+        /* INI LAYER KHUSUS BACKGROUND (Agar teks tidak ikut blur) */
+        .chat-container::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: inherit; /* Mengambil gambar dari background container */
+            background-size: cover;
+            background-position: center;
+            filter: blur(var(--blur-amount, 0px)); /* Dikontrol oleh slider */
+            z-index: -1; /* Berada di belakang teks */
+            transition: filter 0.3s ease;
+        }
 
         /* Status Bar ala HP */
         .status-bar { padding: 8px 20px; display: flex; justify-content: space-between; font-size: 11px; color: #666; background: #0a0a0c; z-index: 10; font-weight: 600; }
@@ -42,13 +63,27 @@
         .wp-option:hover { transform: scale(1.05); border-color: #00d2ff; }
         
         /* Area Chatting */
-        #display { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; scroll-behavior: smooth; scrollbar-width: none; }
+        #display { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; scroll-behavior: smooth; scrollbar-width: none; }
         #display::-webkit-scrollbar { display: none; }
         
-        .bot-msg, .user-msg { padding: 12px 16px; border-radius: 18px; font-size: 13px; max-width: 85%; line-height: 1.5; animation: slideUp 0.3s ease-out forwards; position: relative; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        .bot-msg { background: #232329; align-self: flex-start; border-bottom-left-radius: 2px; color: #e0e0e0; border: 1px solid #2a2a2e; }
-        .user-msg { background: #007bff; align-self: flex-end; border-bottom-right-radius: 2px; color: white; font-weight: 400; }
-        .time { font-size: 9px; opacity: 0.6; display: block; margin-top: 6px; text-align: right; }
+        /* --- GANTI BAGIAN INI SAJA --- */
+.bot-msg, .user-msg { 
+    padding: 12px 14px; 
+    border-radius: 18px; 
+    font-size: 13px; 
+    max-width: 75%; /* Gue naikin dikit ke 75% biar pas di layar lebar */
+    line-height: 1.5; 
+    animation: slideUp 0.3s ease-out forwards; 
+    position: relative; 
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
+    margin: 5px 10px; /* <--- TAMBAHKAN INI biar ada jarak dari pinggir */
+}
+/* ---------------------------- */
+
+.bot-msg { background: #232329; align-self: flex-start; border-bottom-left-radius: 2px; color: #e0e0e0; border: 1px solid #2a2a2e; }
+.user-msg { background: #007bff; align-self: flex-end; border-bottom-right-radius: 2px; color: white; font-weight: 400; }
+.time { font-size: 9px; opacity: 0.6; display: block; margin-top: 6px; text-align: right; }
+
 
         /* Komponen Spesial */
         .pay-card { background: #1f1f23; border: 1px dashed #34343a; padding: 14px; border-radius: 14px; margin-top: 10px; transition: 0.3s; }
@@ -94,6 +129,149 @@
         @keyframes zoomIn { from { transform: scale(0.6); opacity: 0; } to { transform: scale(1); opacity: 1; } }
         @keyframes blink { 50% { opacity: 0.3; } }
         @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        
+.floating-wa {
+    position: fixed;
+    bottom: 80px; /* <--- Pas di atas menu tombol Harga/Bayar */
+    right: 10px;   /* <--- Kasih jarak dikit biar gak mepet pinggir layar */
+    background: #25d366;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 50px;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    font-weight: bold;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    z-index: 99;
+    animation: slideInRight 0.5s ease;
+    transition: 0.3s;
+}
+
+.floating-wa img { width: 18px; height: 18px; }
+.floating-wa:hover { transform: scale(1.05); background: #20ba5a; }
+
+/* KODE SAKTI: Biar tombol WA gak lari ke ujung layar pas dibuka di Chrome PC */
+@media (min-width: 450px) {
+    .floating-wa {
+        right: calc(50% - 215px); 
+    }
+}
+
+@keyframes slideInRight {
+    from { transform: translateX(100px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+/* Styling Modal Background ala Gambar 2 */
+.modal-bg-picker {
+    display: none;
+    position: fixed;
+    z-index: 10000;
+    left: 0; top: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(5px);
+    justify-content: center; align-items: center;
+}
+.bg-picker-content {
+    background: white;
+    width: 90%;
+    max-width: 350px;
+    padding: 20px;
+    border-radius: 20px;
+    color: #333;
+    text-align: center;
+}
+.bg-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-top: 15px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+.bg-item {
+    width: 100%;
+    height: 150px;
+    border-radius: 10px;
+    object-fit: cover;
+    cursor: pointer;
+    border: 2px solid transparent;
+}
+.bg-item:hover { border-color: #00d2ff; }
+
+/* Styling Menu Pop-up ala Gambar 3 */
+.popup-menu {
+    display: none;
+    position: absolute;
+    bottom: 80px;
+    right: 20px;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 15px;
+    padding: 10px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    z-index: 100;
+    width: 150px;
+    animation: slideUp 0.3s ease;
+}
+.menu-item {
+    padding: 10px;
+    color: #333;
+    font-size: 13px;
+    font-weight: 600;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+    text-align: center;
+}
+.menu-item:last-child { border: none; }
+
+/* Style Tabel Harga Bot agar Rapi di HP */
+.bot-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    font-size: 0.75rem; /* Font agak kecil biar gak makan tempat */
+    color: #eee;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.bot-table th, .bot-table td {
+    border: 1px solid #333;
+    padding: 6px 4px;
+    text-align: center; /* Harga & Produk jadi di tengah */
+}
+
+.bot-table th {
+    background-color: #222;
+    color: #ffd700; /* Warna Emas */
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.bot-table tr:nth-child(even) {
+    background-color: #1c1c21;
+}
+
+.bot-table tr:hover {
+    background-color: #25252b; /* Efek highlight kalau disentuh */
+}
+
+.bot-note {
+    display: block;
+    font-size: 10px;
+    color: #bbb;
+    margin-top: 5px;
+    font-style: italic;
+    line-height: 1.2;
+}
+.bot-note b {
+    color: #ffcc00; /* Warna kuning untuk kata penting di note */
+}
+
     </style>
 </head>
 <body>
@@ -106,7 +284,7 @@
       <div class="header">
     <a href="https://fanz-cloud.github.io/Profile-fanzmarket/" class="back-btn">‹</a>
     <div class="bot-info">
-        <h3>BOT ASSISTANT</h3>
+        <h3>MarketFanz Support</h3>
         <span><div class="dot"></div> Online</span>
     </div>
     
@@ -116,16 +294,8 @@
         </div>
 
         <div id="display"></div>
-        <div id="typing">sedang mengetik...</div>
-
-        <div class="quick-replies">
-            <button class="qr-btn" onclick="quickReply('Daftar Harga')">Harga</button>
-            <button class="qr-btn" onclick="quickReply('Pembayaran')">Bayar</button>
-            <button class="qr-btn" onclick="quickReply('Cara Order')">Order</button>
-            <button class="qr-btn" onclick="quickReply('Lama Proses')">Proses</button>
-        </div>
-
-<div class="input-box">
+        <div id="typing">mengetik...</div>
+     <div class="input-box" style="position: relative;">
     <input type="text" id="userInput" placeholder="Tulis sesuatu..." onkeypress="if(event.key === 'Enter') sendMsg()">
     
     <button id="send" onclick="sendMsg()">
@@ -133,30 +303,50 @@
             <path d="M248 8C111 8 0 119 0 256s111 248 248 248 248-111 248-248S385 8 248 8zm121.8 169.9l-40.7 191.8c-3 13.6-11.1 16.9-22.4 10.5l-62.1-45.8-29.9 28.8c-3.3 3.3-6.1 6.1-12.5 6.1l4.4-63.1 114.9-103.8c5-4.4-1.1-6.9-7.7-2.5L171.8 288.5 110.8 269c-13.4-4.2-13.6-13.4 2.8-19.7l238.2-91.8c11-4 20.6 2.6 16.2 20.4z"/>
         </svg>
     </button>
+
+    <button id="openMenu" onclick="toggleMenu()" style="background:none; border:none; cursor:pointer; display:flex; align-items:center; padding-left: 5px;">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="24" height="24" fill="#00d2ff">
+            <path d="M0 96C0 78.3 14.3 64 32 64H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H416c17.7 0 32 14.3 32 32z"/>
+        </svg>
+    </button>
+
+    <div id="myMenu" class="popup-menu">
+        <div class="menu-item" onclick="quickReply('Daftar MENU')">Daftar MENU</div>
+        <div class="menu-item" onclick="quickReply('Cek Saldo')">Cek Saldo</div>
+        <div class="menu-item" onclick="quickReply('Komplain Transaksi')">Komplain Transaksi</div>
+        <div class="menu-item" onclick="quickReply('Komplain Deposit')">Komplain Deposit</div>
+    </div>
 </div>
 
-        <div id="wpModal" class="modal-wp">
-        <div class="modal-wp-content">
-            <h4 style="margin-bottom: 5px; color: white;">Tema Chat</h4>
-            <p style="font-size: 11px; color: #888; margin-bottom: 15px;">Atur nama & background</p>
-              <button onclick="resetNama()" style="width: 100%; padding: 10px; border-radius: 12px; border: 1px solid #444; background: #232329; color: #ff4757; font-size: 11px; font-weight: bold; cursor: pointer; margin-bottom: 15px; transition: 0.3s;">
+
+     <div id="wpModal" class="modal-wp">
+    <div class="modal-wp-content">
+        <h4 style="margin-bottom: 5px; color: white;">Tema Chat</h4>
+        <p style="font-size: 11px; color: #888; margin-bottom: 15px;">Atur nama & background</p>
+        
+        <button onclick="resetNama()" style="width: 100%; padding: 10px; border-radius: 12px; border: 1px solid #444; background: #232329; color: #ff4757; font-size: 11px; font-weight: bold; cursor: pointer; margin-bottom: 15px; transition: 0.3s;">
             🔄 RESET NAMA PANGGILAN
         </button>
-        
-            <div class="wp-grid">
-                <div class="wp-option" style="background: #16161a;" onclick="changeBg('default')"></div>
-                
-                <div class="wp-option" style="background-image: url('walpaperlive_2.jpg');" onclick="changeBg('walpaperlive_2.jpg')"></div>
-                
-                <div class="wp-option" style="background-image: url('walpaperlive_3.jpg');" onclick="changeBg('walpaperlive_3.jpg')"></div>
-                
-                <div class="wp-option" style="background-image: url('walpaper_4.jpg');" onclick="changeBg('walpaper_4.jpg')"></div>
-                
-                <div class="wp-option" style="background-image: url('walpaper_5.jpg');" onclick="changeBg('walpaper_5.jpg')"></div>
-            </div>
-            <button onclick="closeWpModal()" style="margin-top: 20px; width: 100%; padding: 12px; border-radius: 15px; border: none; background: #ff4757; color: white; font-weight: bold; cursor: pointer;">Tutup</button>
+
+        <div class="wp-grid" style="grid-template-columns: repeat(2, 1fr); max-height: 250px; overflow-y: auto; padding-right: 5px;">
+            <div class="wp-option" style="background-image: url('walpaperlive_1.jpg'); height: 120px;" onclick="changeBg('walpaperlive_1.jpg')"></div>
+            <div class="wp-option" style="background-image: url('walpaperlive_2.jpg'); height: 120px;" onclick="changeBg('walpaperlive_2.jpg')"></div>
+            <div class="wp-option" style="background-image: url('walpaperlive_3.jpg'); height: 120px;" onclick="changeBg('walpaperlive_3.jpg')"></div>
+            <div class="wp-option" style="background-image: url('walpaper_4.jpg'); height: 120px;" onclick="changeBg('walpaper_4.jpg')"></div>
+            <div class="wp-option" style="background-image: url('walpaper_5.jpg'); height: 120px;" onclick="changeBg('walpaper_5.jpg')"></div>
+            <div class="wp-option" style="background-image: url('walpaper_6.jpg'); height: 120px;" onclick="changeBg('walpaper_6.jpg')"></div>
+            <div class="wp-option" style="background-image: url('walpaper_7.jpg'); height: 120px;" onclick="changeBg('walpaper_7.jpg')"></div>
+            <div class="wp-option" style="background-image: url('walpaper_8.jpg'); height: 120px;" onclick="changeBg('walpaper_8.jpg')"></div>
         </div>
+
+        <div style="margin-top: 20px; text-align: left;">
+            <p style="font-size: 12px; color: white; margin-bottom: 8px;">Tingkat Blur: <span id="blurVal">0px</span></p>
+            <input type="range" min="0" max="15" value="0" style="width: 100%; accent-color: #00d2ff;" oninput="applyBlur(this.value)">
+        </div>
+
+        <button onclick="closeWpModal()" style="margin-top: 20px; width: 100%; padding: 12px; border-radius: 15px; border: none; background: #ff4757; color: white; font-weight: bold; cursor: pointer;">Tutup</button>
     </div>
+</div>
     
     <div id="qrisModal">
         <div class="modal-content">
@@ -172,31 +362,94 @@
         const NO_WA_ADMIN = "6287795237332"; // Ganti ke nomor WA asli lu
         let userName = localStorage.getItem("user_fanzz");
 
-        // --- DATABASE RESPON PINTAR ---
-        const botKnowledge = {
-            "halo": ["Halo! Ada yang bisa dibantu kak?", "Halo! Mau top up apa hari ini?", "Siap melayani, silakan tanya-tanya Bosku!"],
-            "legal": ["Pastinya 100% Legal & Aman kak. Kita pakai sistem resmi, dijamin anti-minus🙏🏻"],
-            "admin": ["Admin lagi proses pesanan lain, tapi kalau mau chat WA langsung bisa kok."],
-            "ml": ["Diamond MLBB ready stok, proses kilat! Cek harganya di menu ya."],
-            "ff": ["Diamond Free Fire murah ready stok, proses dalam hitungan menit!"],
-            "error": ["Kalau ada kendala sistem atau salah input, lapor CS via WA ya😊"]
-        };
+               // --- DATABASE RESPON PINTAR (VERSI UPGRADE) ---
+          const botKnowledge = {
+            "halo": ["Halo! Ada yang bisa dibantu kk?", "Halo! Mau top up apa hari ini kk? (kami tidak menerima hutang dlm jumlah & bntuk apapun ya..)"],
+            "p": ["Ada yang bisa Saya bantu? (kami tidak menerima hutang dlm jumlah & bentuk apapun ya..)"],
+            "admin": ["Admin lagi proses pesanan lain, kalo mau chat WA langsung bisa klik tombol hijau di pojok bawah ya."],
+            "error": ["Kalau ada kendala sistem atau salah input ID, segera lapor ke CS via WA dengan kirim bukti transfer ya😊"],
+            "testi": ["Testimoni kita sudah bejibun kak! Bisa cek di CH / tanya admin buat minta testimoninya.", "Banyak kak, jangan ragu! Kita jaga amanah kok."],
+            "jam": ["MarketFanzz aktif setiap hari! Jam operasional utama 07:00 - 22:00. Di luar itu slow respon ya."],
+            "proses": ["Pesanan diproses setelah pembayaran terverifikasi kak. Tunggu 1-5 menit aja!"],
+            "rekening": ["Untuk nomor rekening atau e-wallet, silakan ketik 'Bayar' atau klik menu Pembayaran ya."],
+            "mahal": ["Harga kita sudah diset paling kompetitif kak, cocok banget buat dijual lagi (reseller)!"],
+            "siapa": ["Gue asisten prib Fanz, asisten paling cntik di sini 🗿", "Cuma sebuah bot yang diciptakan buat bantuin lu top up ler!"],
+            "pagi": ["Selamat pagi! Semangat ya harinya, jangan lupa top up! ☀️"],
+            "malam": ["Malam juga! Jangan lupa tidur, tapi order dulu ya 😴"],
+            
+            // --- MENU UTAMA ---
+            "daftar menu": ["Berikut adalah layanan utama kami:<br><br>1. <b>Top Up Game</b><br>2. <b>Pulsa & Kuota</b><br>3. <b>E-Wallet</b><br>4.️ <b>Voucher</b><br><br>Ketik <b>angkanya</b> atau <b>namanya</b> untuk cek detail."],
+
+            // --- KATEGORI 1: GAMES ---
+            "1": ["🎮 <b>MENU TOP UP GAMES</b><br>Ketik nama gamenya untuk cek harga:<br>• <b>ML</b> / <b>FF</b> / <b>PUBG</b><br>• <b>COD</b> / <b>Genshin</b> / <b>AOV</b><br>• <b>Higgs</b>"],
+            "games": ["🎮 <b>MENU TOP UP GAMES</b><br>Ketik nama gamenya untuk cek harga:<br>• <b>ML</b> / <b>FF</b> / <b>PUBG</b><br>• <b>COD</b> / <b>Genshin</b> / <b>AOV</b><br>• <b>Higgs</b>"],
+            
+            "ml": [`<b>💎 PRICELIST MOBILE LEGENDS</b><table class="bot-table"><tr><th>Produk</th><th>Harga</th></tr><tr><td>5 Dm / 12 Dm</td><td>1.000 / 3.500</td></tr><tr><td>28 Dm / 36 Dm</td><td>8.000 / 10.000</td></tr><tr><td>56 Dm / 85 Dm</td><td>15.000 / 22.500</td></tr><tr><td>100 Dm / 144 Dm</td><td>26.000 / 38.000</td></tr><tr><td>170 Dm / 240 Dm</td><td>45.500 / 63.000</td></tr><tr><td>355 Dm / 425 Dm</td><td>93.000 / 112.000</td></tr><tr><td>514 Dm / 712 Dm</td><td>132k / 183k</td></tr><tr><td>875 Dm / 1050 Dm</td><td>217k / 265.5k</td></tr><tr><td>1220 Dm / 1453 Dm</td><td>309k / 371k</td></tr><tr><td>1750 Dm / 2180 Dm</td><td>441k / 524k</td></tr><tr><td>2578 Dm / 4020 Dm</td><td>625k / 961k</td></tr><tr><td>7660 Dm</td><td>1.839.000</td></tr><tr><td>WDP / Twilight</td><td>29.500 / 146.500</td></tr><tr><td>Starlight Plus</td><td>195.500</td></tr></table><span class="bot-note"><b>Note:</b> Proses 1-5 Menit Via ID + Server. Harga Hanya berlaku untuk order via web.</span>`],
+            "ff": [`<b>🔥 PRICELIST FREE FIRE</b><table class="bot-table"><tr><th>Produk</th><th>Harga</th></tr><tr><td>5 Dm / 12 Dm</td><td>500 / 1.000</td></tr><tr><td>20 Dm / 30 Dm</td><td>3.000 / 4.000</td></tr><tr><td>50 Dm / 70 Dm</td><td>6.000 / 9.000</td></tr><tr><td>100 Dm / 140 Dm</td><td>13k / 18k</td></tr><tr><td>210 Dm / 355 Dm</td><td>27k / 48k</td></tr><tr><td>500 Dm / 720 Dm</td><td>68k / 95k</td></tr><tr><td>1000 Dm / 1440 Dm</td><td>135k / 190k</td></tr><tr><td>2000 Dm / 2180 Dm</td><td>260k / 285k</td></tr><tr><td>3640 Dm / 7290 Dm</td><td>470k / 930k</td></tr><tr><td>Mem Mingguan</td><td>27.000</td></tr><tr><td>Mem Bulanan</td><td>81.000</td></tr><tr><td>BP Card</td><td>41.500</td></tr></table><span class="bot-note"><b>Note:</b>Proses 1-5 Menit Via ID. Harga Hanya berlaku untuk order via web.</span>`],
+            "pubg": [`<b>🔫 PRICELIST PUBG MOBILE</b><table class="bot-table"><tr><th>Produk</th><th>Harga</th></tr><tr><td>35 UC / 50 UC</td><td>15.500 / 24.000</td></tr><tr><td>70 UC / 100 UC</td><td>27.500 / 29.500</td></tr><tr><td>150 UC / 210 UC</td><td>45.500 / 59.500</td></tr><tr><td>300 UC / 500 UC</td><td>75.500 / 122.500</td></tr><tr><td>750 UC / 1000 UC</td><td>173.5k / 230.5k</td></tr><tr><td>2500 UC</td><td>509.000</td></tr></table><span class="bot-note"><b>Note:</b> Masukkan ID dengan teliti.</span>`],
+            "cod": [`<b>🎖️ PRICELIST CODM</b><table class="bot-table"><tr><th>Produk</th><th>Harga</th></tr><tr><td>31 CP / 62 CP</td><td>5.500 / 10.000</td></tr><tr><td>127 CP / 317 CP</td><td>20.000 / 45.500</td></tr><tr><td>634 CP / 1373 CP</td><td>94.000 / 178.500</td></tr><tr><td>2059 CP</td><td>211.500</td></tr></table><span class="bot-note"><b>Note:</b>Proses 1-5 Menit Via ID. Harga Hanya berlaku untuk order via web.</span>`],
+            "genshin": [`<b>🪄 PRICELIST GENSHIN</b><table class="bot-table"><tr><th>Produk</th><th>Harga</th></tr><tr><td>60 Crystals</td><td>12.500</td></tr><tr><td>330 Crystals</td><td>59.500</td></tr><tr><td>1090 Crystals</td><td>179.000</td></tr><tr><td>2240 Crystals</td><td>387.500</td></tr><tr><td>3880 Crystals</td><td>615.500</td></tr></table><span class="bot-note"><b>Note:</b>Proses 1-5 Menit Via ID, Harga Hanya berlaku untuk order via web.</span>`],
+            "higgs": [`<b>🎰 PRICELIST HIGGS</b><table class="bot-table"><tr><th>Produk</th><th>Harga</th></tr><tr><td>1B Chip</td><td>15.000</td></tr><tr><td>2B Chip</td><td>30.000</td></tr></table><span class="bot-note"><b>Note:</b>Harga Hanya berlaku untuk order via web.</span>`],
+
+            // --- KATEGORI 2: PULSA ---
+            "2": ["📱 <b>MENU PULSA</b><br>Ketik nama operator:<br>• <b>Tsel</b> / <b>Byu</b><br>• <b>XL</b> / <b>Axis</b><br>• <b>Indosat</b> / <b>Tri</b>"],
+            "pulsa": ["📱 <b>MENU PULSA</b><br>Ketik nama operator:<br>• <b>Telkomsel</b> / <b>Byu</b><br>• <b>XL</b> / <b>Axis</b><br>• <b>Indosat</b> / <b>Tri</b>"],
+            
+            "telkomsel": [`<b>🔴 TELKOMSEL</b><table class="bot-table"><tr><th>Nominal</th><th>Harga</th></tr><tr><td>5k / 10k</td><td>6.500 / 11.000</td></tr><tr><td>20k / 25k</td><td>21.000 / 26.000</td></tr><tr><td>50k / 100k</td><td>51.500 / 102.000</td></tr><tr><td>150k / 200k</td><td>152.000 / 202.000</td></tr></table><span class="bot-note"><b>Note:</b> Pastikan no benar & aktif | Harga yg tertera berlaku untuk order via web..</span>`],
+            "xl": [`<b>🔵 XL AXIATA</b><table class="bot-table"><tr><th>Nominal</th><th>Harga</th></tr><tr><td>5k / 10k</td><td>6.000 / 11.000</td></tr><tr><td>25k / 50k</td><td>26.000 / 51.500</td></tr><tr><td>100k / 200k</td><td>102.000 / 202.000</td></tr></table><span class="bot-note"><b>Note:</b> Pulsa Reguler menambah masa aktif | Harga yg tertera berlaku untuk order via web..</span>`],
+            "axis": [`<b>🟣 AXIS</b><table class="bot-table"><tr><th>Nominal</th><th>Harga</th></tr><tr><td>5k / 10k</td><td>6.000 / 11.000</td></tr><tr><td>25k / 50k</td><td>26.500 / 51.500</td></tr><tr><td>100k / 200k</td><td>101.000 / 202.000</td></tr></table><span class="bot-note"><b>Note:</b> Proses 1-5 menit | Harga yg tertera berlaku untuk order via web..</span>`],
+            "isat": [`<b>🟡 INDOSAT</b><table class="bot-table"><tr><th>Nominal</th><th>Harga</th></tr><tr><td>5k / 10k</td><td>6.500 / 11.500</td></tr><tr><td>25k / 50k</td><td>25.500 / 51.500</td></tr><tr><td>100k</td><td>102.000</td></tr></table><span class="bot-note"><b>Note:</b> Masukkan no dengan benar | Harga yg tertera berlaku untuk order via web..</span>`],
+            "tri": [`<b>⚪ THREE</b><table class="bot-table"><tr><th>Nominal</th><th>Harga</th></tr><tr><td>5k / 10k</td><td>6.500 / 11.500</td></tr><tr><td>25k / 50k</td><td>26.000 / 51.000</td></tr><tr><td>100k / 200k</td><td>102.000 / 202.000</td></tr></table><span class="bot-note"><b>Note:</b> Tri proses cepat | Harga yg tertera berlaku untuk order via web..</span>`],
+            "byu": [`<b>🔵 BY.U</b><table class="bot-table"><tr><th>Nominal</th><th>Harga</th></tr><tr><td>3k / 5k</td><td>4.000 / 6.000</td></tr><tr><td>10k / 20k</td><td>11.000 / 21.000</td></tr><tr><td>50k / 100k</td><td>51.000 / 101.500</td></tr></table><span class="bot-note"><b>Note:</b> Masukkan nomor By.u lengkap | Harga yg tertera berlaku untuk order via web..</span>`],
+
+            // --- KATEGORI 3: E-WALLET ---
+            "3": ["💳 <b>MENU E-WALLET</b><br>Ketik pilihan:<br>• <b>DANA</b> / <b>GOPAY</b><br>• <b>OVO</b> / <b>SHOPEE</b> / <b>Linkaja</b>"],
+            "ewallet": ["💳 <b>MENU E-WALLET</b><br>Ketik pilihan:<br>• <b>DANA</b> / <b>GOPAY</b><br>• <b>OVO</b> / <b>SHOPEE</b> / <b>Linkaja</b>"],
+            
+            "dana": [`<b>🔵 DANA</b><table class="bot-table"><tr><th>Nominal</th><th>Harga</th></tr><tr><td>1k - 5k</td><td>1.500 - 5.500</td></tr><tr><td>10k / 20k</td><td>11.000 / 21.000</td></tr><tr><td>50k / 100k</td><td>52.000 / 103.000</td></tr><tr><td>150k / 200k</td><td>153.000 / 203.000</td></tr></table><span class="bot-note"><b>Note:</b> Sertakan nomor HP DANA | Harga yg tertera berlaku untuk order via web..</span>`],
+            "gopay": [`<b>🟢 GOPAY</b><table class="bot-table"><tr><th>Nominal</th><th>Harga</th></tr><tr><td>1k - 5k</td><td>1.500 - 5.500</td></tr><tr><td>10k / 50k</td><td>11.500 / 51.500</td></tr><tr><td>100k / 200k</td><td>102.000 / 202.000</td></tr></table><span class="bot-note"><b>Note:</b> Pastikan No sudah benar | Harga yg tertera berlaku untuk order via web..</span>`],
+            "ovo": [`<b>🟣 OVO</b><table class="bot-table"><tr><th>Nominal</th><th>Harga</th></tr><tr><td>10k / 20k</td><td>11.000 / 21.000</td></tr><tr><td>50k / 100k</td><td>51.500 / 102.500</td></tr><tr><td>200k</td><td>202.500</td></tr></table><span class="bot-note"><b>Note:</b> Biaya admin belum termasuk | Harga yg tertera berlaku untuk order via web..</span>`],
+            "shopeepay": [`<b>🟠 SHOPEEPAY</b><table class="bot-table"><tr><th>Nominal</th><th>Harga</th></tr><tr><td>10k / 50k</td><td>11.500 / 51.500</td></tr><tr><td>100k / 200k</td><td>102.500 / 202.000</td></tr></table><span class="bot-note"><b>Note:</b> Gunakan nomor terdaftar di Shopee | Harga yg tertera berlaku untuk order via web..</span>`],
+            "linkaja": [`<b>🔴 LINKAJA</b><table class="bot-table"><tr><th>Nominal</th><th>Harga</th></tr><tr><td>10k / 50k</td><td>11.500 / 51.500</td></tr><tr><td>100k / 125k</td><td>101.500 / 126.500</td></tr></table><span class="bot-note"><b>Note:</b> Proses Kilat | Harga yg tertera berlaku untuk order via web..</span>`],
+
+            // --- KATEGORI 4: VOUCHER ---
+            "4": ["🎟️ <b>MENU VOUCHER</b><br>Ketik pilihan:<br>• <b>Googleplay</b><br>• <b>Roblox</b><br>• <b>Steam</b>"],
+            "voucher": ["🎟️ <b>MENU VOUCHER</b><br>Ketik pilihan:<br>• <b>Googleplay</b><br>• <b>Roblox</b><br>• <b>Steam</b>"],
+            "googleplay": [`<b>🟢 GOOGLE PLAY</b><table class="bot-table"><tr><th>Nominal</th><th>Harga</th></tr><tr><td>10k / 20k</td><td>12.000 / 22.000</td></tr><tr><td>50k / 100k</td><td>53.000 / 103.000</td></tr><tr><td>200k</td><td>205.000</td></tr></table><span class="bot-note"><b>Note:</b> Kode voucher dikirim via WA | Harga yg tertera berlaku untuk order via web..</span>`],
+            "roblox": [`<b> ROBLOX GIFT CARD</b><table class="bot-table"><tr><th>Nominal</th><th>Harga</th></tr><tr><td>50k / 100k</td><td>52.000 / 102.000</td></tr><tr><td>200k / 500k</td><td>202.000 / 502.000</td></tr></table><span class="bot-note"><b>Note:</b> Redeem di website Roblox resmi | Harga yg tertera berlaku untuk order via web..</span>`],
+            "steam": [`<b> STEAM WALLET</b><table class="bot-table"><tr><th>Nominal</th><th>Harga</th></tr><tr><td>12k / 45k</td><td>15.000 / 50.000</td></tr></table><span class="bot-note"><b>Note:</b> Saldo dalam Rupiah (IDR) | Harga yg tertera berlaku untuk order via web..</span>`],
+
+            "komplain transaksi": ["Silakan kirimkan <b>ID Transaksi</b> dan <b>Bukti Transfer</b> ke Admin via WA ya kak agar segera dicek!"],
+            "pembayaran": ["Untuk pembayaran bisa melalui QRIS, DANA, atau GOPAY. Ketik <b>Bayar</b> untuk instruksi lengkapnya."],
+            "komplain deposit": ["Kirim bukti transfer dan username ke admin via WA ya kak."] 
+          };
+
+
+
+
 
         // Jam Real-time
         setInterval(() => {
             document.getElementById('clock').innerText = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
         }, 1000);
 
-        // Pesan Sambutan Otomatis
+        // Pesan Sambutan Otomatis Berdasarkan Waktu
         window.onload = () => {
             setTimeout(() => {
+                const jam = new Date().getHours();
+                let sapaan = "Good Evening";
+                
+                if (jam >= 5 && jam < 11) sapaan = "Good Morning";
+                else if (jam >= 11 && jam < 15) sapaan = "Good Afternoon";
+                else if (jam >= 15 && jam < 18) sapaan = "Good Evening";
                 if (userName) {
-                    botReply(`welcome back to marketfanz user <b>${userName}</b> 😊. Ada yg bisa saya bantu terkait masalah Pembayaran/trx? boleh tanya² yg lain🙏🏻`);
+                    botReply(`${sapaan} kak <b>${userName}</b>! 😊 Ada yg bisa saya bantu terkait masalah Pembayaran/trx? boleh tanya² yg lain🙏🏻`);
                 } else {
-                    botReply("Selamat datang di MarketFanzz. Boleh tau siapa nama panggilannya biar makin akrab? 😊");
+                    botReply(`${sapaan}! Welcome to MarketFanzz. Boleh tau siapa nama panggilannya biar makin akrab? 😊`);
                 }
             }, 1000);
         };
+
 
         function botReply(html) {
             const display = document.getElementById('display');
@@ -206,78 +459,113 @@
             speak(html.replace(/<[^>]*>?/gm, '')); // Voice mode
         }
 
-        function handleLogic(msg) {
-            let m = msg.toLowerCase();
-            
-            // Simpan Nama User Baru
-            if(!userName && !m.match(/harga|bayar|proses|order|testi/)) {
-                userName = msg;
-                localStorage.setItem("user_fanzz", userName);
-                botReply(`Salam kenal kak <b>${userName}</b>! Nama lu udah gue kirim ke Database. Ada yang bisa gue bantu?`);
-                return;
+           function handleLogic(msg) {
+    let m = msg.toLowerCase().trim(); // Tambah trim agar spasi di awal/akhir hilang
+    
+    // --- FITUR JAM OPERASIONAL ---
+    const jamSekarang = new Date().getHours();
+    if (jamSekarang >= 23 || jamSekarang < 7) { // Contoh: Tutup jam 11 malam - 7 pagi
+        botReply("Maaf kak, saat ini **MarketFanzz sedang tutup** (Istirahat) 😴. Pesanan yang masuk sekarang akan diproses mulai jam 07:00 pagi ya. Terima kasih!");
+        return;
+    }
+
+    // 1. Simpan Nama User Baru (Jangan simpan kalau itu klik dari Menu Pop-up)
+    const menuKeywords = ["daftar menu", "cek saldo", "komplain transaksi", "komplain deposit"];
+    if(!userName && !m.match(/harga|bayar|proses|order|testi/) && !menuKeywords.includes(m)) {
+        userName = msg;
+        localStorage.setItem("user_fanzz", userName);
+        botReply(`Salam kenal kk <b>${userName}</b>! Nama mu udah saya kirim ke Database. Ada yang bisa saya bantu?`);
+        return;
+    }
+
+    let nameTag = userName ? ` kk ${userName}` : " Bosku";
+
+    // 2. PRIORITAS: Cek Database botKnowledge dulu (Untuk Menu Pop-up)
+    let found = false;
+    for (let key in botKnowledge) {
+        // Cek apakah input SAMA PERSIS dengan keyword (agar "Daftar MENU" tidak tertukar)
+        if (m === key) { 
+            let resList = botKnowledge[key];
+            if(resList[0] !== "") { // Jangan balas kalau isinya kosong (cek saldo/deposit)
+                botReply(resList[Math.floor(Math.random() * resList.length)]);
+                found = true; 
+                break;
+            } else {
+                // Jika kosong (seperti permintaanmu untuk cek saldo/deposit), bot tidak balas apa-apa atau bisa kasih pesan default
+                return; 
             }
+        }
+    }
 
-            let nameTag = userName ? ` kak ${userName}` : " Bosku";
+    if (found) return; // Jika sudah ketemu di botKnowledge, berhenti di sini.
 
-            // Fitur Utama
-            if(m.includes("harga")) {
-                botReply(`Daftar harga sudah murah, cek selengkapnya ada di web utama ya${nameTag}!`);
-            } else if(m.includes("bayar") || m.includes("payment")) {
-                botReply(`Selesaikan pembayaran lewat sini${nameTag}:<br>
-                     
-
-                    <div class="pay-card">
-                        <small>DANA</small><br><b>087819661875</b>
-                        <button class="copy-btn" onclick="copyRek('087819661875')">SALIN NOMOR</button>
-                      
-                    <div class="pay-card">
-                        <small>GOPAY</small><br><b>087795237332</b>
-                        <button class="copy-btn" onclick="copyRek('087795237332')">SALIN NOMOR</button>
-                    </div>
-                    
-                    <div class="pay-card" style="border-color: #f7931e;">
-                        <b>🟠 QRIS (ALL PAYMENT)</b><br>
-                        <button onclick="openModal()" style="background:#f7931e; color:black; border:none; padding:9px; border-radius:8px; font-weight:700; font-size:11px; margin-top:10px; cursor:pointer; width:100%;">TAMPILKAN BARCODE</button>
-                    </div>`);
-                    
-            } else if(m.includes("proses")) {
-                botReply(`Proses kita kilat${nameTag}, cuma 1-5 menit kalau sistem lancar! ⚡`);
-            } else if(m.includes("order")) {
-                botReply("Pilih Game -> Masukkan ID -> Pilih Nominal -> Bayar. pending masuk! 🛒");
-            } 
-            // Cek Database Kata Kunci
-            else {
-                let found = false;
-                for (let key in botKnowledge) {
-                    if (m.includes(key)) {
-                        let resList = botKnowledge[key];
-                        botReply(resList[Math.floor(Math.random() * resList.length)]);
-                        found = true; break;
-                    }
-                }
-                
-                // Jika Pertanyaan Gak Terdaftar -> Arahkan ke WA
-                if (!found) {
-                    let waLink = `https://wa.me/${NO_WA_ADMIN}?text=Halo%20Admin,%20saya%20${userName || 'User'},%20mau%20tanya%20soal:%20${encodeURIComponent(msg)}`;
-                    botReply(`Aduh${nameTag}, gue belum paham soal itu. Tanya langsung ke Admin aja<br><br><a href="${waLink}" target="_blank" style="background:#25d366; color:white; padding:10px 16px; border-radius:12px; text-decoration:none; font-weight:700; display:inline-block; font-size:12px; box-shadow: 0 4px 12px rgba(37,211,102,0.3);">💬 TANYA ADMIN (WA)</a>`);
-                }
+    // 3. Logika Manual (Harga, Bayar, Proses, dll)
+    if(m.includes("harga")) {
+        botReply(`Harga yang tertera di web sudah murah dibanding harga real ${nameTag}!`);
+    } else if(m.includes("bayar") || m.includes("payment")) {
+        botReply(`Selesaikan pembayaran lewat sini${nameTag}:<br>
+            <div class="pay-card">
+                <small>DANA</small><br><b>087819661875</b>
+                <button class="copy-btn" onclick="copyRek('087819661875')">SALIN NOMOR</button>
+            </div>
+            <div class="pay-card">
+                <small>GOPAY</small><br><b>087795237332</b>
+                <button class="copy-btn" onclick="copyRek('087795237332')">SALIN NOMOR</button>
+            </div>
+            <div class="pay-card" style="border-color: #f7931e;">
+                <b>🟠 QRIS (ALL PAYMENT)</b><br>
+                <button onclick="openModal()" style="background:#f7931e; color:black; border:none; padding:9px; border-radius:8px; font-weight:700; font-size:11px; margin-top:10px; cursor:pointer; width:100%;">TAMPILKAN BARCODE</button>
+            </div>`);
+    } else if(m.includes("proses")) {
+        botReply(`Proses kita kilat${nameTag}, cuma 1-5 menit kalau sistem lancar ⚡`);
+    } else if(m.includes("order")) {
+        botReply("Pilih Game -> Masukkan ID -> Pilih Nominal -> Bayar. Pesanan otomatis masuk! 🛒");
+    } 
+    // 4. Jika Tidak Ketemu Sama Sekali
+    else {
+        // Cek lagi di botKnowledge tapi pakai .includes (untuk kata-kata santai seperti 'lucu', 'siapa', dll)
+        for (let key in botKnowledge) {
+            if (m.includes(key) && key.length > 2) { // minimal 3 huruf biar gak gampang typo
+                let resList = botKnowledge[key];
+                botReply(resList[Math.floor(Math.random() * resList.length)]);
+                found = true; break;
             }
         }
 
-        function sendMsg() {
-            const input = document.getElementById('userInput');
-            const val = input.value.trim();
-            if(!val) return;
-            let jam = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-            document.getElementById('display').innerHTML += `<div class="user-msg">${val}<span class="time">${jam}</span></div>`;
-            input.value = "";
-            document.getElementById('display').scrollTop = document.getElementById('display').scrollHeight;
-            document.getElementById('typing').style.display = "block";
-            setTimeout(() => {
-                document.getElementById('typing').style.display = "none";
-                handleLogic(val);
-            }, 1000);
+        if (!found) {
+            let waLink = `https://wa.me/${6287795237332}?text=Halo%20Admin...`;
+            botReply(`Keyword belum tersedia!. Tanya langsung ke Admin...<br><br><a href="${waLink}" target="_blank" class="wa-btn-link">💬 Chat WA</a>`);
         }
+    }
+}
+
+
+          function sendMsg() {
+    const input = document.getElementById('userInput');
+    const val = input.value.trim();
+    if(!val) return;
+
+    let jam = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    document.getElementById('display').innerHTML += `<div class="user-msg">${val}<span class="time">${jam}</span></div>`;
+    input.value = "";
+    
+    const display = document.getElementById('display');
+    display.scrollTop = display.scrollHeight;
+
+    // Munculin status mengetik lebih keren
+    const typing = document.getElementById('typing');
+    typing.style.display = "block";
+    typing.innerHTML = "Mengetik...";
+
+    setTimeout(() => {
+        typing.style.display = "none";
+        // Mainin suara notif pas bot bales
+        const audio = new Audio('https://files.catbox.moe/69m6v6.mp3');
+        audio.play().catch(e => console.log("Suara diblokir"));
+        handleLogic(val);
+    }, 1500);
+}
+
 
         function speak(t) {
             let s = window.speechSynthesis;
@@ -308,29 +596,70 @@ function closeWpModal() {
     document.getElementById('wpModal').style.display = 'none';
 }
 
+// 1. Fungsi Toggle Menu (Sudah Diperbaiki)
+function toggleMenu() {
+    const menu = document.getElementById('myMenu');
+    menu.style.display = (menu.style.display === 'block') ? 'none' : 'block';
+}
+
+// 2. Klik di luar menu untuk menutup otomatis
+window.addEventListener('click', function(event) {
+    const menu = document.getElementById('myMenu');
+    const openBtn = document.getElementById('openMenu');
+    if (menu && !openBtn.contains(event.target) && !menu.contains(event.target)) {
+        menu.style.display = 'none';
+    }
+});
+
+// 3. SATU FUNGSI BLUR (Hanya wallpaper yang buram)
+function applyBlur(val) {
+    document.getElementById('blurVal').innerText = val + "px";
+    const container = document.querySelector('.chat-container');
+    // Melempar nilai ke variabel CSS --blur-amount untuk layer ::before
+    container.style.setProperty('--blur-amount', val + 'px');
+}
+
+// 4. Fungsi Reset Nama
+function resetNama() {
+    if (confirm("Mau ganti nama panggilannya, kk?")) {
+        localStorage.removeItem("user_fanzz");
+        alert("Nama berhasil direset! Halaman dimuat ulang.");
+        location.reload();
+    }
+}
+
+// 5. Fungsi Terapkan Background
+// Fungsi untuk menyimpan pilihan user ke memori browser
 function changeBg(url) {
     localStorage.setItem('user_bg', url);
     applyBg(url);
 }
 
-function resetNama() {
-    // Munculin konfirmasi biar gak sengaja kehapus
-    if (confirm("Mau ganti nama panggilannya, kak?")) {
-        localStorage.removeItem("user_fanzz"); // Menghapus data nama yang tersimpan
-        alert("Nama berhasil direset! Halaman akan dimuat ulang.");
-        location.reload(); // Refresh halaman supaya bot nanya nama lagi dari awal
-    }
-}
-
+// Fungsi applyBg yang kamu tanyakan (Sudah benar)
 function applyBg(url) {
     const container = document.querySelector('.chat-container');
-    if (url === 'default') {
+    if (url === 'default' || !url) {
         container.style.backgroundImage = 'none';
         container.style.backgroundColor = '#16161a';
     } else {
         container.style.backgroundImage = `url('${url}')`;
     }
 }
+
+// Pastikan fungsi blur kamu versinya seperti ini agar teks tidak burem
+function applyBlur(val) {
+    document.getElementById('blurVal').innerText = val + "px";
+    const container = document.querySelector('.chat-container');
+    // Mengatur variabel CSS agar hanya background yang blur
+    container.style.setProperty('--blur-amount', val + 'px');
+}
+
+
 </script>
+<a href="https://wa.me/6287795237332" class="floating-wa" target="_blank">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WA">
+    <span>CS</span>
+</a>
+
 </body>
 </html>
